@@ -1,0 +1,19 @@
+{
+    "name": "SHPS4Node-SQL",
+    "version": "1.0.0",
+    "description": "SQL DB Interface used by SHPS",
+    "author": "Marco Alka <me@marco-alka.de>",
+    "main": "index-sql.js",
+    "dependencies": {
+        "node-mod-load": "^2.1.0",
+        "mysql2": "< 2.0.0",
+        "mssql": ">=1.3.0 < 4",
+        "generic-pool": "^2.1.0",
+        "vasync": "^1.6.0",
+        "q": "^1.2.0",
+        "sql.js": "^0.3.0",
+        "promise-defer": "^1.0.0",
+        "linkedlist": "^1.0.0",
+        "object-assign": ">=2.0.0 < 5"
+    }
+}
