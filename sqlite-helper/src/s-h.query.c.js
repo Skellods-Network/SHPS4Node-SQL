@@ -34,7 +34,7 @@ require('../interface/s-h.h.js').prototype.query = function ($str, $bindVals, $c
 
         var arr = [];
         var firstRow = stmt.getAsObject($bindVals);
-        if (!!firstRow) {
+        if (!!firstRow && Object.keys(firstRow).length > 0) {
 
             arr.push(firstRow);
         }
