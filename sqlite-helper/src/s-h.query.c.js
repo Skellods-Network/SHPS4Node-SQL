@@ -12,7 +12,15 @@ require('../interface/s-h.h.js').prototype.query = function ($str, $bindVals, $c
             $bindVals = undefined;
         }
 
-        stmt = this.db.prepare($str);
+        //TODO: improve this unsafe test
+        if (/\W*?CREATE/i.test($str)) {
+
+            return $cb(null, this.db.exec($str));
+        }
+        else {
+
+            stmt = this.db.prepare($str);
+        }
 
         if (!!$bindVals) {
 
@@ -40,6 +48,7 @@ require('../interface/s-h.h.js').prototype.query = function ($str, $bindVals, $c
         }
 
         // If we step() on INSERT, data will be duplicated :/
+        //TODO: improve this unsafe test
         if (/SELECT.+?FROM/i.test($str)) {
 
             while (stmt.step()) {
