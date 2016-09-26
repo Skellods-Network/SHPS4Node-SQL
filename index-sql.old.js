@@ -20,6 +20,7 @@ GLOBAL.SHPS_DB_KEY_PRIMARY = 'PRIMARY KEY';
 
 GLOBAL.SHPS_ERROR_NO_ROWS = 'No rows were returned!';
 
+var defer = require('promise-defer');
 var mysql = require('mysql2');
 var mssql = require('mssql');
 var pooling = require('generic-pool');
@@ -547,6 +548,139 @@ var _SQL = function ($dbConfig, $connection) {
             }
         }, d.reject);
 
+        return d.promise;
+    };
+
+    this.initDB = function($templateType) {
+
+        const d = q.defer();
+
+        var template;
+        try {
+
+            template = libs.config.getTemplate($templateType);
+        }
+        catch ($err) {
+
+            d.reject($err);
+            return d.promise;
+        }
+
+        var i = 0;
+        const keys = Object.keys(template.tables);
+        const l = keys.length;
+        const proms = [];
+        while (i < l) {
+
+            //TODO: check if we should devide this task into several cycles in order to not disturb regular server tasks
+
+            let fieldCat;
+            let j;
+            let fcKeys;
+            let c;
+            let index;
+
+            fieldCat = [];
+            j = 0;
+            fcKeys = Object.keys(template.tables[keys[i]].fieldcat);
+            c = fcKeys.length;
+            while (j < c) {
+
+                index = fieldCat.push(template.tables[keys[i]].fieldcat[fcKeys[j]]);
+                index--;
+
+                fieldCat[index].name = fcKeys[j];
+                if (fieldCat[index].key === 'primary') {
+
+                    fieldCat[index].key = SHPS_DB_KEY_PRIMARY;
+                    fieldCat[index].autoincrement = true;
+                }
+
+                switch (fieldCat[index].type) {
+
+                    case 'uint': {
+
+                        // hard to add, so we will just make it an integer for now
+                        // See Skellods-Network/SHPS4Node-SQL#8
+                    }
+                    case 'integer':
+                    case 'int': {
+
+                        fieldCat[index].type = SHPS_DB_COLTYPE_INT;
+                        break;
+                    }
+
+                    case 'string': {
+
+                        fieldCat[index].type = `${SHPS_DB_COLTYPE_STRING}(${fieldCat[index].length})`;
+                        break;
+                    }
+
+                    case 'text': {
+
+                        // See Skellods-Network/SHPS4Node-SQL#8
+                        fieldCat[index].type = 'TEXT';
+                        break;
+                    }
+
+                    case 'bool':
+                    case 'boolean': {
+
+                        // See Skellods-Network/SHPS4Node-SQL#8
+                        fieldCat[index].type = 'TINYINT(1)';
+                        break;
+                    }
+
+                    default: {
+
+                        throw new Error(`Unknown field type: ${fieldCat[index].type}`);
+                    }
+                }
+
+                j++;
+            }
+
+            let currentTable = keys[i];
+            let lProm = defer();
+            proms.push(lProm);
+
+            this.createTable(
+                keys[i],
+                template.tables[keys[i]].charset ? template.tables[keys[i]].charset[this.getServerType()] || 'utf8mb4' : 'utf8mb4',
+                template.tables[keys[i]].charset ? template.tables[keys[i]].collate[this.getServerType()] || 'utf8mb4_unicode_ci' : 'utf8mb4_unicode_ci',
+                fieldCat
+            ).done($r => {
+
+                if (template.tables[currentTable].initial) {
+
+                    const insertProms = [];
+                    var i = 0;
+                    const l = template.tables[currentTable].initial.length;
+                    while (i < l) {
+
+                        let p = defer();
+                        insertProms.push(p);
+                        this.openTable(currentTable).insert(template.tables[currentTable].initial[i]).done(p.resolve, p.reject);
+                        //TODO: check default data against template and correct it where necessary
+
+                        i++;
+                    }
+
+                    Promise.all(insertProms).then(lProm.resolve, lProm.reject);
+                }
+                else {
+
+                    lProm.resolve();
+                }
+            }, $err => {
+
+                lProm.reject($err);
+            });
+
+            i++;
+        }
+
+        Promise.all(proms).then(d.resolve, d.reject);
         return d.promise;
     };
 
