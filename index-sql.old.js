@@ -747,6 +747,10 @@ var _SQL = function ($dbConfig, $connection) {
                 if (typeof fieldset[i].key !== 'undefined') {
 
                     query += ' ' + fieldset[i].key;
+                    if (_dbType === SHPS_SQL_SQLITE) {
+
+                        query += ' AUTOINCREMENT';
+                    }
                 }
 
                 if (typeof fieldset[i].comment !== 'undefined') {
