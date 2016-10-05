@@ -586,7 +586,7 @@ var _SQL = function ($dbConfig, $connection) {
             c = fcKeys.length;
             while (j < c) {
 
-                index = fieldCat.push(template.tables[keys[i]].fieldcat[fcKeys[j]]);
+                index = fieldCat.push(Object.assign({}, template.tables[keys[i]].fieldcat[fcKeys[j]]));
                 index--;
 
                 fieldCat[index].name = fcKeys[j];
@@ -596,7 +596,7 @@ var _SQL = function ($dbConfig, $connection) {
                     fieldCat[index].autoincrement = true;
                 }
 
-                switch (fieldCat[index].type) {
+                switch (fieldCat[index].type.toLowerCase()) {
 
                     case 'uint': {
 
@@ -644,8 +644,9 @@ var _SQL = function ($dbConfig, $connection) {
             let lProm = defer();
             proms.push(lProm);
 
+            let curTbl = this.openTable(currentTable);
             this.createTable(
-                keys[i],
+                curTbl.getFullName(),
                 template.tables[keys[i]].charset ? template.tables[keys[i]].charset[this.getServerType()] || 'utf8mb4' : 'utf8mb4',
                 template.tables[keys[i]].charset ? template.tables[keys[i]].collate[this.getServerType()] || 'utf8mb4_unicode_ci' : 'utf8mb4_unicode_ci',
                 fieldCat
@@ -660,7 +661,7 @@ var _SQL = function ($dbConfig, $connection) {
 
                         let p = defer();
                         insertProms.push(p);
-                        this.openTable(currentTable).insert(template.tables[currentTable].initial[i]).done(p.resolve, p.reject);
+                        curTbl.insert(template.tables[currentTable].initial[i]).done(p.resolve, p.reject);
                         //TODO: check default data against template and correct it where necessary
 
                         i++;
@@ -742,11 +743,19 @@ var _SQL = function ($dbConfig, $connection) {
 
                         query += ' AUTO_INCREMENT';
                     }
+
+                    //TODO use IDENTITY(1,1) for T-SQL
+                    //TODO add insert 0 on a_i into INSERT for MySQL and SQLite
+                    //TODO add left-statement to QueryBuilder
                 }
 
                 if (typeof fieldset[i].key !== 'undefined') {
 
                     query += ' ' + fieldset[i].key;
+                    if (_dbType === SHPS_SQL_SQLITE) {
+
+                        query += ' AUTOINCREMENT';
+                    }
                 }
 
                 if (typeof fieldset[i].comment !== 'undefined') {
@@ -964,7 +973,7 @@ var _SQL = function ($dbConfig, $connection) {
 
         case SHPS_SQL_MYSQL: {
             
-            _query('SET NAMES \'UTF8\';').done();
+            _query('SET NAMES \'UTF8\'; SET SESSION sql_mode=\'NO_AUTO_VALUE_ON_ZERO\';').done();
             _dbType = SHPS_SQL_MYSQL;
             _query('SELECT VERSION();').done(function ($res) {
                 

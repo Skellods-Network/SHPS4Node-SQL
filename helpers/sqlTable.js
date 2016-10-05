@@ -269,7 +269,13 @@ var _sqlTable = function c_sqlTable($sql, $name) {
             vals.push(param);
         }
 
-        $sql.query('INSERT INTO ' + _getAbsoluteName() + ' (' + keys + ') VALUES (' + vals + ');', params).done($r => {
+        var query = 'INSERT INTO ' + _getAbsoluteName() + ' (' + keys + ') VALUES (' + vals + ');';
+        if ($sql.getServerType() === SHPS_SQL_MSSQL) {
+
+            query = `BEGIN TRY SET IDENTITY_INSERT ${this.getAbsoluteName()} ON; END TRY BEGIN CATCH END CATCH ${query} BEGIN TRY SET IDENTITY_INSERT ${this.getAbsoluteName()} OFF; END TRY BEGIN CATCH END CATCH`;
+        }
+
+        $sql.query(query, params).done($r => {
 
             $sql.flush().then(defer.resolve.bind(null, $r), defer.reject);
         }, defer.reject);
