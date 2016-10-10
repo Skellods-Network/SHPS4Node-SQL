@@ -886,7 +886,18 @@ var _SQL = function ($dbConfig, $connection) {
     = this.fetchResult = function () {
         
         return [];
-    }
+    };
+
+    /**
+     * Get query result from cache
+     *
+     * @param $key mixed
+     * @returns {*}
+     */
+    this.getFromCache = function ($key) {
+
+        return libs.cache.load(this.requestState, $key);
+    };
     
     /**
      * Get one result row
@@ -946,7 +957,7 @@ var _SQL = function ($dbConfig, $connection) {
     var _getRequestState =
     this.getRequestState = function f_sql_getRequestState() {
         
-        return $requestState;
+        return this.requestState;
     };
     
     /**
@@ -1119,7 +1130,8 @@ var _newSQL
                     
                     if (!$err) {
                         
-                        var sql = new _SQL(dbConfig, $con);
+                        const sql = new _SQL(dbConfig, $con);
+                        sql.requestState = $requestState;
                         defer.resolve(sql);
                     }
                     else {
@@ -1154,7 +1166,9 @@ var _newSQL
 
                     if ($err === null) {
 
-                        defer.resolve(new _SQL(dbConfig, $client));
+                        const sql = new _SQL(dbConfig, $client);
+                        sql.requestState = $requestState;
+                        defer.resolve(sql);
                     }
                     else {
 
@@ -1204,7 +1218,9 @@ var _newSQL
                     
                     if ($err === null) {
 
-                        defer.resolve(new _SQL(dbConfig, new mssql.Request($client)));
+                        const sql = new _SQL(dbConfig, new mssql.Request($client));
+                        sql.requestState = $requestState;
+                        defer.resolve(sql);
                     }
                     else {
 
@@ -1237,7 +1253,9 @@ var _newSQL
                     }
                     else {
 
-                        defer.resolve(new _SQL(dbConfig, $con));
+                        const sql = new _SQL(dbConfig, $con);
+                        sql.requestState = $requestState;
+                        defer.resolve(sql);
                     }
                 });
 
@@ -1254,7 +1272,9 @@ var _newSQL
                     }
                     else {
 
-                        defer.resolve(new _SQL(dbConfig, $client));
+                        const sql = new _SQL(dbConfig, new mssql.Request($client));
+                        sql.requestState = $requestState;
+                        defer.resolve(sql);
                     }
                 });
 
@@ -1279,8 +1299,10 @@ var _newSQL
                                 req.query($query, $cb);
                             };
                         }
-                        
-                        defer.resolve(new _SQL(dbConfig, $client));
+
+                        const sql = new _SQL(dbConfig, new mssql.Request($client));
+                        sql.requestState = $requestState;
+                        defer.resolve(sql);
                     }
                 });
 

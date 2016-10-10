@@ -2,6 +2,7 @@
 
 var me = module.exports;
 
+var q = require('q');
 var mysql = require('mysql2');
 var oa = require('object-assign');
 var u = require('util');
@@ -376,5 +377,19 @@ var _SQLQueryBuilder = function f_sql_sqlQueryBuilder($sql) {
                 throw ('UNKNOWN ERROR in SQLQueryBuilder (operation `' + operation + '` has no meaning)!');
             }
         }
+    };
+
+    this.cache = function f_sqlQueryBuilder_cache($conditions) {
+
+        const d = q.defer();
+
+        this.execute($conditions).done($r => {
+
+            const key = $sql.getLastQuery();
+            libs.cache.save($sql.getRequestState(), key, $r, true);
+            d.resolve(key);
+        }, d.reject);
+
+        return d.promise;
     };
 };

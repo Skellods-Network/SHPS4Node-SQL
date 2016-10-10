@@ -540,4 +540,21 @@ var _sqlConditionBuilder = function c_sqlConditionBuilder($sqb) {
             return this;
         }
     };
+
+    /**
+     * Cache result instead of returning it directly
+     * @returns Promise|Object
+     *   If no sqlQueryBuilder is attached, this sqlConditionBuilder is returned
+     */
+    this.cache = function f_sqlConditionBuilder_sqlConditionBuilder_cache() {
+
+        if ($sqb) {
+
+            return $sqb.cache(this);
+        }
+        else {
+
+            return this;
+        }
+    };
 };
