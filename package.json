@@ -1,6 +1,6 @@
 {
     "name": "SHPS4Node-SQL",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "SQL DB Interface used by SHPS",
     "author": "Marco Alka <me@marco-alka.de>",
     "main": "index-sql.js",
