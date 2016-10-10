@@ -740,24 +740,27 @@ var _SQL = function ($dbConfig, $connection) {
                     if (_dbType === SHPS_SQL_SQLITE) {
 
                         fieldset[i].key = SHPS_DB_KEY_PRIMARY;
+                        query += ' AUTOINCREMENT';
                     }
-                    else {
+                    else if ((_dbType & SHPS_SQL_MYSQL) == SHPS_SQL_MYSQL) {
 
                         query += ' AUTO_INCREMENT';
                     }
+                    else if (_dbType === SHPS_SQL_MSSQL) {
 
-                    //TODO use IDENTITY(1,1) for T-SQL
-                    //TODO add insert 0 on a_i into INSERT for MySQL and SQLite
+                        query += ' IDENTITY(1,1)';
+                    }
+                    else {
+
+                        libs.coml.writeError(`Could not add the attribute \`AUTOINCREMENT\` on column ${_standardizeName(name)}.${_standardizeName(fieldset[i].name)}!`);
+                    }
+
                     //TODO add left-statement to QueryBuilder
                 }
 
                 if (typeof fieldset[i].key !== 'undefined') {
 
                     query += ' ' + fieldset[i].key;
-                    if (_dbType === SHPS_SQL_SQLITE) {
-
-                        query += ' AUTOINCREMENT';
-                    }
                 }
 
                 if (typeof fieldset[i].comment !== 'undefined') {
