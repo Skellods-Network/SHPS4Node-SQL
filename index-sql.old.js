@@ -740,7 +740,6 @@ var _SQL = function ($dbConfig, $connection) {
                     if (_dbType === SHPS_SQL_SQLITE) {
 
                         fieldset[i].key = SHPS_DB_KEY_PRIMARY;
-                        query += ' AUTOINCREMENT';
                     }
                     else if ((_dbType & SHPS_SQL_MYSQL) == SHPS_SQL_MYSQL) {
 
@@ -761,6 +760,10 @@ var _SQL = function ($dbConfig, $connection) {
                 if (typeof fieldset[i].key !== 'undefined') {
 
                     query += ' ' + fieldset[i].key;
+                    if (_dbType === SHPS_SQL_SQLITE && fieldset[i].autoincrement) {
+
+                        query += ' AUTOINCREMENT';
+                    }
                 }
 
                 if (typeof fieldset[i].comment !== 'undefined') {
