@@ -732,7 +732,14 @@ var _SQL = function ($dbConfig, $connection) {
                 query += _standardizeName(fieldset[i].name) + ' ' + fieldset[i].type + (fieldset[i].null ? ' ' : ' NOT') + ' NULL'; /* COMMENT*/
                 if (typeof fieldset[i].default !== 'undefined') {
 
-                    query += ' DEFAULT ' + fieldset[i].default; //TODO: add string delimiters if necessary! Change Date Obj to String (or INT Timestamp??)
+                    if (fieldset[i].type.includes(SHPS_DB_COLTYPE_STRING) || fieldset[i].type.includes(SHPS_DB_COLTYPE_TEXT)) {
+
+                        query += ' DEFAULT ' + _standardizeString(fieldset[i].default);
+                    }
+                    else {
+
+                        query += ' DEFAULT ' + fieldset[i].default; //TODO: Change Date Obj to String (or INT Timestamp??)
+                    }
                 }
 
                 if (fieldset[i].autoincrement) {
