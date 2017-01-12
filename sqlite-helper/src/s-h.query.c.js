@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 
 require('../interface/s-h.h.js').prototype.query = function ($str, $bindVals, $cb) {

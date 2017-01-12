@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 module.exports = require('./interface/s-h.h.js');
 
