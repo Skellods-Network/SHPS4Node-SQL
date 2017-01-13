@@ -2,6 +2,7 @@
     "name": "SHPS4Node-SQL",
     "version": "1.1.2",
     "description": "SQL DB Interface used by SHPS",
+    "license": "MPL-2.0",
     "author": "Marco Alka <me@marco-alka.de>",
     "main": "index-sql.js",
     "dependencies": {

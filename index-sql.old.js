@@ -310,7 +310,7 @@ var _SQL = function ($dbConfig, $connection) {
                 
                 case SHPS_SQL_MSSQL: {
                     
-                    var ps = new mssql.PreparedStatement($connection);
+                    var ps = new mssql.PreparedStatement($connection.connection);
 
                     for (var key in $param) {
 
