@@ -15,7 +15,8 @@
     "promise-defer": "1.x.x",
     "linkedlist": "1.x.x",
     "knex": "0.12.x",
-    "result-js": "1.1.x"
+    "result-js": "1.1.x",
+    "SHPS4Node-config": "1.2.x"
   },
   "optionalDependencies": {
     "mysql2": "1.1.x",

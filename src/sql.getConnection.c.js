@@ -37,5 +37,16 @@ libs['SQL.h'].prototype.getConnection = function ($requestState, $alias = 'defau
     const alias = parVal;
 
 
+    if (typeof this.dbs[requestState.request.url.hostname] === 'undefined') {
+
+        return Result.fromError(new Error('No DBs available for given vhost'));
+    }
+
+    if (typeof this.dbs[requestState.request.url.hostname][alias] === 'undefined') {
+
+        return Result.fromError(new Error('Alias not found for given vhost'));
+    }
+
+
     return Result.fromSuccess(new libs['SQLConnection.h'](this.dbs[requestState.request.url.hostname][alias]));
 };

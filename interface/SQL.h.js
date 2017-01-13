@@ -4,7 +4,7 @@
 module.exports =
 
     /**
-     * Class for querying a SQL database
+     * Class for connecting to a SQL database
      */
     class SQL {
 

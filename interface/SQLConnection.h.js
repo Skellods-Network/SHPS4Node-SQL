@@ -1,7 +1,7 @@
 'use strict';
 
 
-module.exports = new (
+module.exports =
 
     /**
      * Class for querying a SQL database
@@ -9,12 +9,12 @@ module.exports = new (
     class SQLConnection {
 
         /**
-         * Create an interface to a certain database/schema
+         * Constructor
          *
-         * @param {RequestState} $requestState
-         *   State to use for interfaces
+         * @param {Object} $dbConfig
+         *   DBConfig as found in the config object
          */
-        constructor($requestState) { this._init($requestState); };
+        constructor($dbConfig) { this._init($dbConfig); };
 
-    }
-);
+
+    };
