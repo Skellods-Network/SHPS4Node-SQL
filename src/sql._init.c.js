@@ -5,12 +5,18 @@ const nml = require('node-mod-load');
 
 const libs = nml('SHPS4Node-SQL').libs;
 
+const SQL = libs['SQL.h'];
 
-libs['SQL.h'].prototype._init = function () {
 
-    // use init system to create pools for all available DB configs with minPool=0 so no connection is established when none is needed
+SQL.prototype._init = function () {
 
-    this.dbs = new Map();
+    if (typeof this._isInitialized !== 'undefined') {
+
+        throw new Error('This SQL object has already been initialized!');
+    }
+
+    this._isInitialized = true;
+    this._dbs = new Map();
 
     nml('SHPS4Node').libs['Schedule'].schedule.addSlot('afterInitialization', () => {
 
@@ -22,37 +28,31 @@ libs['SQL.h'].prototype._init = function () {
         while (i < l) {
 
             let url = vHosts[i].URL.value;
-            this.dbs.set(url, {});
-            let aliases = this.dbs.get(url);
+            this._dbs.set(url, new Map());
             for (let c of config.getDBConfig(url)) {
 
-                let alias = config.getDBConfig(url, c, 'alias');
+                const alias = config.getDBConfig(url, c, 'alias');
                 let type = 'mysql';
                 switch (config.getDBConfig(url, c, 'type')) {
 
-                    case 16: type = 'mssql'; break;
-                    case 32: type = 'sqlite'; break;
+                    case SQL.DBTYPE_MSSQL: type = 'mssql'; break;
+                    case SQL.DBTYPE_SQLITE: type = 'sqlite'; break;
                 }
 
-                let connection;
-                if (type === 'sqlite') {
+                const connection = {};
+                if (type !== 'sqlite') {
 
-                    connection = {
-
-                        filename: config.getDBConfig(url, c, 'host'),
-                    }
+                    connection.host = config.getDBConfig(url, c, 'host');
+                    connection.user = config.getDBConfig(url, c, 'user');
+                    connection.password = config.getDBConfig(url, c, 'pass');
+                    connection.database = config.getDBConfig(url, c, 'name');
                 }
                 else {
 
-                    connection = {
-                        host: config.getDBConfig(url, c, 'host'),
-                        user: config.getDBConfig(url, c, 'user'),
-                        password: config.getDBConfig(url, c, 'pass'),
-                        database: config.getDBConfig(url, c, 'name'),
-                    };
+                    connection.filename = config.getDBConfig(url, c, 'host');
                 }
 
-                let knex = knex({
+                const knex = knex({
 
                     client: type,
                     pool: {
@@ -64,10 +64,12 @@ libs['SQL.h'].prototype._init = function () {
 
                 if (type !== 'sqlite') {
 
-                    knex = knex.withSchema(connection.database);
+                    this._dbs.get(url).set(alias, knex.withSchema(connection.database));
                 }
+                else {
 
-                this.dbs.get(url).set(alias, knex);
+                    this._dbs.get(url).set(alias, knex);
+                }
             }
 
             i++;

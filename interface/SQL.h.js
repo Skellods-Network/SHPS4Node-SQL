@@ -25,3 +25,7 @@ module.exports =
          */
         getConnection($requestState, $alias) { throw 'Not Implemented: getConnection'; };
     };
+
+module.exports.DBTYPE_MYSQL = 0b10;         // 2
+module.exports.DBTYPE_MSSQL = 0b10000;      // 16
+module.exports.DBTYPE_SQLITE = 0b100000;    // 32
